@@ -37,6 +37,7 @@
 //#include "display.h"
 #include "showDisplay.h"
 #include "uart_ringBuffer.h"
+#include "xmodem.h"
 
 //---------------BUFFER-----------------
 ringBuferData_struct *pRingBufferRx;
@@ -49,7 +50,11 @@ char ch;		// buffer character
 //-----------------LCD------------------
 ringBuferData_struct *pRingBufferDisplay;
 char state_display = NORMAL_MODE;
-char character = '-';
+//char character = '-';
+//--------------------------------------
+
+//---------------XMODEM-----------------
+ringBuferData_struct *pRingBufferVChecksum;
 //--------------------------------------
 
 //---------------TIMER------------------
@@ -87,8 +92,8 @@ int main(void) {
 
 	show_data_init();
 
-	//myprintf("Hello World\r\n");
-	uart_send_byte(21); //NACK 21
+	myprintf("Hello World\r\n");
+	//uart_send_byte(21); //NACK 21
 
 	while (1) {
 

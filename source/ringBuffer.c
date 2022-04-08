@@ -86,7 +86,7 @@ int32_t ringBuffer_getCount(ringBuferData_struct *pRb) {
 	return pRb->count;
 }
 
-void ringBuffer_deInit(ringBuferData_struct *prb) {
+void ringBuffer_deInit(ringBuferData_struct *pRb) {
 	free(pRb);
 	pRb = NULL;
 }

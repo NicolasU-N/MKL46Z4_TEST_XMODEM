@@ -9,6 +9,7 @@
 #define XMODEM_H_
 
 #include "Tiempo.h"
+#include "showDisplay.h"
 
 #define SOH  1
 #define EOT  4

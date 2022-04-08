@@ -16,6 +16,7 @@
 #include "ringBuffer.h"
 #include "KL46z.h"
 #include "Varios.h"
+#include "showDisplay.h"
 
 
 void clock_config();

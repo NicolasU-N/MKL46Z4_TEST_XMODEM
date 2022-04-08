@@ -149,10 +149,10 @@ char uart_receive_byte() {
 		Tm_Inicie_timeout(&c_tiempo, N_TO_NEW_DATA, 400); // 1600 -> 2 seg||8000 -> 10 SEG
 
 		if (!ringBuffer_isFull(pRingBufferRx)) {
-			flag_xoff = NO;
+			//flag_xoff = NO;
 		} else {
 			UART0_D = XOFF; //0x13 XOFF || 0X19 XOFF REALTERM
-			flag_xoff = SI;
+			//flag_xoff = SI;
 		}
 		//uart_send_byte(UART0_D);
 		//if (ringBuffer_putData(pRingBufferRx, UART0_D)) {
@@ -169,9 +169,10 @@ char uart_receive_byte() {
 
 void UART0_IRQHandler() {
 	// agregar dato al buffer
+	uart_send_byte(UART0_D);
 	ringBuffer_putData(pRingBufferRx, UART0_D);
-
 	state_display = NORMAL_MODE;
+
 
 	//Tm_Inicie_timeout(&c_tiempo, N_TO_NEW_DATA, 8000); //10 SEG
 	//if (!ringBuffer_isFull(pRingBufferRx)) {
