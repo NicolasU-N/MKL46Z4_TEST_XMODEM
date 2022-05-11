@@ -11,6 +11,11 @@
 #include "Tiempo.h"
 #include "showDisplay.h"
 
+//--------------------- debug
+#include "uart_ringBuffer.h"
+#include "fsl_uart.h"
+//--------------------- debug
+
 #define SOH  1
 #define EOT  4
 #define ACK  6
@@ -21,16 +26,13 @@
 #define RECIBIR	1
 #define VALIDAR	2
 #define MOSTRAR	3
-#define ERROR	4
+//#define ERROR	4
 
-#define ERROR_RX_TO	0
-#define ERROR_TX_TO	0
+//#define ERROR_RX_TO	0
+//#define ERROR_TX_TO	0
 
 void xmodem_init();
 
 void procesar_xmoden();
-
-
-
 
 #endif /* XMODEM_H_ */

@@ -14,10 +14,13 @@ static int8_t power;
 static char send_count;
 
 extern Tm_Control c_tiempo;
-extern ringBuferData_struct *pRingBufferRx;
-//extern char flag_xoff;
+extern buffer_struct *pBufferRx;
 
 extern char state_display;
+
+//----------------------------------- DEBUG UART1
+
+//-----------------------------------
 
 void clock_config() {
 	/*config clock Rx Tx*/
@@ -32,7 +35,25 @@ void clock_config() {
 
 void uart0_init(unsigned int uart0clk, unsigned int baud_rate) {
 	/*setting buffer*/
-	pRingBufferRx = ringBuffer_init(BUFF_SIZE_RX); // 32 64 200
+	pBufferRx = buffer_init(BUFF_SIZE_RX); // 32 64 200
+	//----------------------------------------------------------------------- DEBUG
+
+	uart_config_t config;
+	BOARD_InitPins();
+
+	UART_GetDefaultConfig(&config);
+	config.baudRate_Bps = 115200; //BOARD_DEBUG_UART_BAUDRATE
+	config.enableTx = true;
+	config.enableRx = true;
+
+	UART_Init(DEMO_UART, &config, DEMO_UART_CLK_FREQ);
+
+	//uint8_t *txbf = (uint8_t*) "HELLO\r\n";
+	//UART_WriteBlocking(DEMO_UART, txbf, strlen((char*) txbf));
+
+	myprintf_uart1("HELLO\r\n");
+
+	//----------------------------------------------------------------------- DEBUG
 
 	unsigned int calculated_baud = 0;
 	unsigned int baud_diff = 0;
@@ -124,14 +145,14 @@ void uart0_init(unsigned int uart0clk, unsigned int baud_rate) {
 	//UART0_C2 = 0x0Cu;
 }
 
-void uart_send_byte(char data_input) {
+void uart_send_byte(uint8_t data_input) {
 	UART0_D = data_input;
 	while (!(UART0_S1 & (1 << UART0_S1_TDRE_SHIFT)))
 		;
 	//while(!(UART0_S1 & (1 << UART0_S1_TC_SHIFT))); //Waiting for transmission to get complete
 }
 
-void uart_send_string(char *str_data) {
+void uart_send_string(uint8_t *str_data) {
 	while (*str_data) {
 		uart_send_byte(*str_data);
 		str_data++;
@@ -145,44 +166,41 @@ char uart_receive_byte() {
 	//return UART0_D;
 
 	if ((UART0_S1 & (1 << UART0_S1_RDRF_SHIFT))) {
-		ringBuffer_putData(pRingBufferRx, UART0_D);
-		Tm_Inicie_timeout(&c_tiempo, N_TO_NEW_DATA, 400); // 1600 -> 2 seg||8000 -> 10 SEG
-
-		if (!ringBuffer_isFull(pRingBufferRx)) {
-			//flag_xoff = NO;
-		} else {
-			UART0_D = XOFF; //0x13 XOFF || 0X19 XOFF REALTERM
-			//flag_xoff = SI;
-		}
+		buffer_add(pBufferRx, UART0_D);
+		//Tm_Inicie_timeout(&c_tiempo, N_TO_NEW_DATA, 400); // 1600 -> 2 seg||8000 -> 10 SEG
+		/*
+		 if (!buffer_is_full(pBufferRx)) {
+		 //flag_xoff = NO;
+		 } else {
+		 UART0_D = XOFF; //0x13 XOFF || 0X19 XOFF REALTERM
+		 //flag_xoff = SI;
+		 }
+		 */
 		//uart_send_byte(UART0_D);
-		//if (ringBuffer_putData(pRingBufferRx, UART0_D)) {
+		//if (buffer_add(pBufferRx, UART0_D)) {
 		//uart_send_byte(UART0_D);
 		//	return SI;
 		//} else {
 		//	return NO;
 		//}
-		//return UART0_D;
 	}
-	//ringBuffer_putData(pRingBufferRx, UART0_D);
+	return UART0_D;
+	//buffer_add(pBufferRx, UART0_D);
 }
-
 
 void UART0_IRQHandler() {
 	// agregar dato al buffer
-	uart_send_byte(UART0_D);
-	ringBuffer_putData(pRingBufferRx, UART0_D);
-	state_display = NORMAL_MODE;
-
+	//uart_send_byte(UART0_D);
+	buffer_add(pBufferRx, UART0_D);
 
 	//Tm_Inicie_timeout(&c_tiempo, N_TO_NEW_DATA, 8000); //10 SEG
-	//if (!ringBuffer_isFull(pRingBufferRx)) {
+	//if (!buffer_is_full(pBufferRx)) {
 	//	flag_xoff = NO;
 	//} else {
 	//	//UART0_D = XOFF; //0x13 XOFF || 0X19 XOFF REALTERM
 	//	flag_xoff = SI;
 	//}
 }
-
 
 /*Printf Function*/
 void myprintf(char *str, ...) {
@@ -223,7 +241,7 @@ void myprintf(char *str, ...) {
 				break;
 
 			case 'c':
-				uart_send_byte(va_arg(ap, char)); //int
+				uart_send_byte(va_arg(ap, uint8_t)); //int
 				break;
 
 			}
@@ -231,4 +249,61 @@ void myprintf(char *str, ...) {
 		}
 	}
 	va_end(ap);
+}
+
+void myprintf_uart1(char *str, ...) {
+	va_list ap;
+	va_start(ap, str);
+	int i = 0;
+
+	while (str && str[i]) {
+		//uart_send_byte(str[i],1);
+		UART1_Write(str[i]);
+		i++;
+
+		if (str[i] == '%') {
+			i++;
+
+			switch (str[i]) {
+			case 'd':
+				number = va_arg(ap, int);
+				divisor_check = number;
+				divisor = 0;
+				power = -1;
+				send_count = 0;
+
+				while (divisor_check != 0) {
+					divisor_check = divisor_check / 10;
+					power++;
+				}
+
+				divisor = pow(10, power);
+
+				while (divisor != 0) {
+					send_count = number / divisor;
+					number = number - send_count * divisor;
+					divisor = divisor / 10;
+					// Convert to ASCII value
+					send_count = send_count + 48;
+					//uart_send_byte(send_count);
+					UART1_Write(send_count);
+				}
+				break;
+
+			case 'c':
+				//uart_send_byte(va_arg(ap, uint8_t)); //int
+				UART1_Write(va_arg(ap, uint8_t));
+				break;
+
+			}
+			i++;
+		}
+	}
+	va_end(ap);
+}
+
+void UART1_Write(uint8_t data) {
+	UART1->D = data;
+	while (!(UART1->S1 & UART_S1_TDRE_MASK))
+		;
 }

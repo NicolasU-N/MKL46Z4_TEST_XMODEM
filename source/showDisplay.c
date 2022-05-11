@@ -6,29 +6,35 @@
  */
 #include "showDisplay.h"
 
-extern char state_display;
-
-char character;
-
-extern ringBuferData_struct *pRingBufferDisplay;
-
 extern Tm_Control c_tiempo;
+extern buffer_struct *pBufferDisplay;
 
-void show_data_init(){
+char state_display;
+uint8_t character;
+
+extern char flag_eot;
+
+void show_data_init() {
+	// Initialize display
+	display_init();
+	state_display = STBY;
 	Tm_Inicie_periodo(&c_tiempo, N_PER_MUX, 1); //8.333 ms = 120hz
-
-	pRingBufferDisplay = ringBuffer_init(BUFF_SIZE_DIS); // 32 64 200
+	pBufferDisplay = buffer_init(BUFF_SIZE_DIS); // 32 64 200
 }
 
 void show_data() {
 	switch (state_display) {
 	case NORMAL_MODE:
-		if (!ringBuffer_isEmpty(pRingBufferDisplay)) { // si hay datos en el buffer
-			ringBuffer_getData(pRingBufferDisplay, &character);
-			myprintf("C=%d\r\n", character); //CO=%d
+		if (!buffer_is_empty(pBufferDisplay)) { // si hay datos en el buffer
+			buffer_get_data(pBufferDisplay, &character);
+			myprintf_uart1(" %d\r\n", character); //CO=%d
+			// BAJAR PERIODO 2HZ
+			// STATE NORMAL
 		}
-		lcd_scan();
-
+		display_scan(character);
+		break;
+	case STBY:
+		set_display_stby();
 		break;
 	}
 }

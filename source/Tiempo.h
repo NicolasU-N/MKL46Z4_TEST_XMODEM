@@ -97,7 +97,7 @@ char Tm_Inicie_pwm(Tm_Control *tcp, Tm_Num num_pwm, Tm_Contador periodo,
 		Tm_Contador cmp, Tm_Num num_puerto); //, GPIO_Type *puerto
 
 // Desactivar un período para que deje de funcionar
-void Tm_Termine_pwm(Tm_Control *tcp, Tm_Num num_pwm);
+char Tm_Termine_pwm(Tm_Control *tcp, Tm_Num num_pwm);
 
 // Verificar si hubo fin de conteo en un periodo
 //char Tm_Hubo_pwm(Tm_Control *tcp, Tm_Num num_pwm);
