@@ -26,12 +26,13 @@
 //get k bits from p position
 //#define GET_LSB(number, k, p) (((1 << k) - 1) & (number >> (p - 1)))
 
-void lcd_init();
+void display_init();
 
-void lcd_scan();
+//void display_scan();
+void display_scan(uint8_t character);
 
-void lcd_off();
+void set_display_stby();
 
-//void lcd_set_character(char ch);
+void display_off();
 
 #endif /* DISPLAY_H_ */

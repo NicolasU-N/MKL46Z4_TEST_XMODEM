@@ -168,7 +168,7 @@ char Tm_Inicie_pwm(Tm_Control *tcp, Tm_Num num_pwm, Tm_Contador periodo,
 }
 
 ///Desactivar un período para que deje de funcionar
-void Tm_Termine_pwm(Tm_Control *tcp, Tm_Num num_pwm) {
+char Tm_Termine_pwm(Tm_Control *tcp, Tm_Num num_pwm) {
 	Tm_Pwm *ppwm;
 
 	if (num_pwm >= tcp->npwm)

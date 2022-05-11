@@ -34,13 +34,12 @@
  */
 #include <stdio.h>
 #include "pit.h"
-//#include "display.h"
 #include "showDisplay.h"
 #include "uart_ringBuffer.h"
 #include "xmodem.h"
 
 //---------------BUFFER-----------------
-ringBuferData_struct *pRingBufferRx;
+buffer_struct *pBufferRx;
 char flag_xoff;	//1 xoff activated
 
 char rxvalueMNS;
@@ -48,13 +47,11 @@ char ch;		// buffer character
 //--------------------------------------
 
 //-----------------LCD------------------
-ringBuferData_struct *pRingBufferDisplay;
-char state_display = NORMAL_MODE;
-//char character = '-';
+buffer_struct *pBufferDisplay;
 //--------------------------------------
 
 //---------------XMODEM-----------------
-ringBuferData_struct *pRingBufferVChecksum;
+
 //--------------------------------------
 
 //---------------TIMER------------------
@@ -63,10 +60,8 @@ static Tm_Periodo periodos[NUM_PER];
 static Tm_Timeout timeouts[NUM_TO];
 static Tm_Pwm pwms[NUM_PWMS];
 
-//char flag_timeout_0 = NO; //
 //char flag_timeout_1 = NO; //
-char flag_timeout_2 = NO; //
-
+//char flag_timeout_2 = NO; //
 //char flag_timeout_3 = NO; //
 
 static char atender_timer(char atienda);
@@ -76,10 +71,8 @@ static char atender_timer(char atienda);
  * @brief   Application entry point.
  */
 int main(void) {
-
 	clock_config();
 
-	lcd_init();
 	/* ============ UART0 ================ */
 	uart0_init(SystemCoreClock, 2400); //115200
 
@@ -92,8 +85,11 @@ int main(void) {
 
 	show_data_init();
 
-	myprintf("Hello World\r\n");
-	//uart_send_byte(21); //NACK 21
+	//myprintf("Hello World\r\n");
+	uart_send_byte(NAK); //NACK 21
+
+	//BOARD_InitDebugConsole();
+	//PRINTF("Hello World\r\n");
 
 	while (1) {
 
@@ -102,42 +98,20 @@ int main(void) {
 		}
 
 		if (Tm_Hubo_periodo(&c_tiempo, N_PER_MUX)) { // 120hz multiplexacion y sacar datos de buffer de display
+			Tm_Baje_periodo(&c_tiempo, N_PER_MUX);
 			show_data();
 		}
-		Tm_Baje_periodo(&c_tiempo, N_PER_MUX);
 
 		//PROCESE XMODEM
 		procesar_xmoden();
 
-		//if (ringBuffer_getCount(pRingBufferRx) != 0) {
-		//	ringBuffer_getData(pRingBufferRx, &ch);
-		//uart_send_string("C=");
-		//uart_send_byte(ch);
-		//	myprintf("C= %d\r\n", ch); //CO=%d
-
+		//Timeouts
 		/*
-		 if (ch == 'a') {
-		 set_blink_1hz();
-		 } else if (ch == 's') {
+		 if (Tm_Hubo_timeout(&c_tiempo, N_TO_2HZ)) {
+		 Tm_Termine_timeout(&c_tiempo, N_TO_2HZ);
 		 set_blink_2hz();
-		 } else if (ch == 'd') {
-		 set_normal_mode();
-		 } else if (ch == 'f') {
-		 character = '-';
-		 show_data();
-		 state_display = END_DISPLAY;
-		 } else {
-		 character = ch;
 		 }
 		 */
-
-		//uart_send_byte(6);
-		//}
-		//if (flag_timeout_2 != Tm_Hubo_timeout(&c_tiempo, N_TO_NEW_DATA)) {
-		//	uart_send_string("TO ACK\r\n");
-		//	uart_send_byte(6);
-		//}
-		//flag_timeout_2 = Tm_Hubo_timeout(&c_tiempo, N_TO_NEW_DATA);
 	}
 	return 0;
 }
