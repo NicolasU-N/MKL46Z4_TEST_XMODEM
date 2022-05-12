@@ -95,8 +95,6 @@ void procesar_xmoden() {
 			 */
 			//------------------- degub display
 			set_normal_mode();
-			//myprintf("BF FULL\r\n");
-
 			state_xmodem = VALIDAR;
 			flagvalidate = SI;
 			flag_eot = NO; //bandera para validar que se termino la transmision
@@ -114,33 +112,16 @@ void procesar_xmoden() {
 
 				if (chrx == 4 || chrx == 24) { // validar si el primer caracter es EOT O CAN
 					myprintf_uart1("EOT %d\r\n", chrx);
-					uart_send_byte(ACK);
-					//uart_send_byte(ACK);
-					//uart_send_byte(ACK);
+					Tm_Termine_timeout(&c_tiempo, N_TO_PKT_INC);
 					buffer_reset(pBufferRx);			//reset buffer
 					chrx = 0;
-
 					state_xmodem = RECIBIR;
 					set_stby_mode();
-
 					flag_eot = SI;
 					flagvalidate = SI;
 					sum_checksum = pakectNo = lastpakectNoComp = lastpakectNo = num_intentos_ACK = 0;
-				} else if (chrx == 1) { //&& buffer_get_count(pBufferRx)
-
-					if (Tm_Hubo_timeout(&c_tiempo, N_TO_PKT_INC)) {
-						//Tm_Termine_timeout(&c_tiempo, N_TO_PKT_INC);
-						myprintf_uart1("BF INCL\r\n");
-						buffer_reset(pBufferRx);			//reset buffer
-						sum_checksum = num_intentos_ACK = 0;
-						flag_eot = NO;
-						flagvalidate = NO;
-						state_xmodem = RECIBIR;
-						chrx = 0;
-					}
-
+					uart_send_byte(ACK);
 				}
-
 			}
 
 			if (Tm_Hubo_timeout(&c_tiempo, N_TO_PKT_INC) && !flag_eot) {
@@ -191,7 +172,7 @@ void procesar_xmoden() {
 		 */
 
 		if ((pakectNo == lastpakectNo + 1) && (lastpakectNoComp == 255 - pakectNo)) { // en secuencia Y valida complemento
-			myprintf_uart1("\r\nOK PCKT\r\n");
+			//myprintf_uart1("\r\nOK PCKT\r\n");
 			lastpakectNo = pakectNo; // Actualizar pakectNo
 			flag_eot = NO;
 			flagvalidate = SI;
@@ -200,7 +181,7 @@ void procesar_xmoden() {
 			//PRINTF("\r\nPAQUETE OK %d\r\n", chrx);
 
 		} else if (pakectNo == lastpakectNo) { //Validar duplicado
-			myprintf_uart1("\r\nDUP PCK=%d COMP=%d\r\n", pakectNo, lastpakectNoComp);
+			//myprintf_uart1("\r\nDUP PCK=%d COMP=%d\r\n", pakectNo, lastpakectNoComp);
 			lastpakectNo = pakectNo; // Actualizar pakectNo
 			flag_eot = NO;
 			flagvalidate = SI; //ENVIAR ACK
@@ -211,7 +192,7 @@ void procesar_xmoden() {
 
 			//myprintf("\r\nPAQUETE REPETIDO %d\r\n", chrx);
 		} else { //fuera de secuencia
-			myprintf_uart1("\r\nFS PCK=%d COMP=%d\r\n", pakectNo, lastpakectNoComp);
+			//myprintf_uart1("\r\nFS PCK=%d COMP=%d\r\n", pakectNo, lastpakectNoComp);
 			//myprintf("\r\nERROR PCK=%d COMP=%d\r\n", pakectNo,
 			//		lastpakectNoComp);
 			flag_eot = NO;
@@ -254,7 +235,7 @@ void procesar_xmoden() {
 			buffer_get_data(pBufferRx, &chrx);
 			buffer_get_data(pBufferRx, &chrx); // Omitir header del paquete
 		} else {
-			myprintf_uart1("\r\nERR CSP=%d CSC=%d\r\n", chrx, sum_checksum % 256);
+			//myprintf_uart1("\r\nERR CSP=%d CSC=%d\r\n", chrx, sum_checksum % 256);
 			flag_eot = NO;
 			flagvalidate = NO;
 			buffer_reset(pBufferRx);		//reset buffer
@@ -284,9 +265,7 @@ void procesar_xmoden() {
 		}
 
 		break;
-		//case ERROR:
 
-		//	break;
 	}
 
 }

@@ -11,8 +11,7 @@ char digit = 0;
 
 // codes of symbols
 // segments: g-f-e-d-c-b-a
-const uint32_t scode[] = {
-(1 << SEG_A_PIN) | (1 << SEG_B_PIN) | (1 << SEG_C_PIN) | (1 << SEG_D_PIN) | (1 << SEG_E_PIN) | (1 << SEG_F_PIN) | (0 << SEG_G_PIN), // 0b0111111, //0     //0
+const uint32_t scode[] = { (1 << SEG_A_PIN) | (1 << SEG_B_PIN) | (1 << SEG_C_PIN) | (1 << SEG_D_PIN) | (1 << SEG_E_PIN) | (1 << SEG_F_PIN) | (0 << SEG_G_PIN), // 0b0111111, //0     //0
 (0 << SEG_A_PIN) | (1 << SEG_B_PIN) | (1 << SEG_C_PIN) | (0 << SEG_D_PIN) | (0 << SEG_E_PIN) | (0 << SEG_F_PIN) | (0 << SEG_G_PIN), // 0b0000110, //1     //1
 (1 << SEG_A_PIN) | (1 << SEG_B_PIN) | (0 << SEG_C_PIN) | (1 << SEG_D_PIN) | (1 << SEG_E_PIN) | (0 << SEG_F_PIN) | (1 << SEG_G_PIN), // 0b1011011, //2     //2
 (1 << SEG_A_PIN) | (1 << SEG_B_PIN) | (1 << SEG_C_PIN) | (1 << SEG_D_PIN) | (0 << SEG_E_PIN) | (0 << SEG_F_PIN) | (1 << SEG_G_PIN), // 0b1001111, //3     //3
@@ -29,8 +28,7 @@ const uint32_t scode[] = {
 (0 << SEG_A_PIN) | (1 << SEG_B_PIN) | (1 << SEG_C_PIN) | (1 << SEG_D_PIN) | (1 << SEG_E_PIN) | (0 << SEG_F_PIN) | (1 << SEG_G_PIN), // 0b1011110, //13    //D
 (1 << SEG_A_PIN) | (0 << SEG_B_PIN) | (0 << SEG_C_PIN) | (1 << SEG_D_PIN) | (1 << SEG_E_PIN) | (1 << SEG_F_PIN) | (1 << SEG_G_PIN), // 0b1111001, //14    //E
 (1 << SEG_A_PIN) | (0 << SEG_B_PIN) | (0 << SEG_C_PIN) | (0 << SEG_D_PIN) | (1 << SEG_E_PIN) | (1 << SEG_F_PIN) | (1 << SEG_G_PIN), // 0b1110001, //15    //F
-(0 << SEG_A_PIN) | (0 << SEG_B_PIN) | (0 << SEG_C_PIN) | (0 << SEG_D_PIN) | (0 << SEG_E_PIN) | (0 << SEG_F_PIN) | (1 << SEG_G_PIN),
-}; // 16	 //-
+(0 << SEG_A_PIN) | (0 << SEG_B_PIN) | (0 << SEG_C_PIN) | (0 << SEG_D_PIN) | (0 << SEG_E_PIN) | (0 << SEG_F_PIN) | (1 << SEG_G_PIN), }; // 16	 //-
 
 void display_init() {
 	/* Initialize and enable LED */
