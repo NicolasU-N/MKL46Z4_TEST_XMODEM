@@ -16,18 +16,11 @@ static char send_count;
 extern Tm_Control c_tiempo;
 extern buffer_struct *pBufferRx;
 
-extern char state_display;
-
-//----------------------------------- DEBUG UART1
-
-//-----------------------------------
-
 void clock_config() {
 	/*config clock Rx Tx*/
 	SIM_SCGC5 |= (1U << SIM_SCGC5_SHIFT(PORTA));
 	/*setting low clock 32kHz and FLL 1464 for clock 48MHz*/
-	MCG_C4 = (MCG_C4 & 0xE0u) | (1u << MCG_C4_DMX32_SHIFT)
-			| (1u << MCG_C4_DRS_SHIFT);
+	MCG_C4 = (MCG_C4 & 0xE0u) | (1u << MCG_C4_DMX32_SHIFT) | (1u << MCG_C4_DRS_SHIFT);
 	SystemCoreClockUpdate();
 	/*enable clock*/
 	SIM_SCGC4 |= (1u << SIM_SCGC4_UART0_SHIFT);
@@ -36,6 +29,7 @@ void clock_config() {
 void uart0_init(unsigned int uart0clk, unsigned int baud_rate) {
 	/*setting buffer*/
 	pBufferRx = buffer_init(BUFF_SIZE_RX); // 32 64 200
+
 	//----------------------------------------------------------------------- DEBUG
 
 	uart_config_t config;
@@ -50,7 +44,6 @@ void uart0_init(unsigned int uart0clk, unsigned int baud_rate) {
 
 	//uint8_t *txbf = (uint8_t*) "HELLO\r\n";
 	//UART_WriteBlocking(DEMO_UART, txbf, strlen((char*) txbf));
-
 	myprintf_uart1("HELLO\r\n");
 
 	//----------------------------------------------------------------------- DEBUG
@@ -63,10 +56,8 @@ void uart0_init(unsigned int uart0clk, unsigned int baud_rate) {
 	unsigned char i = 0;
 
 	/*config mux GPIO*/
-	PORT_PCR(PORTA, RX_PIN) = ((PORT_PCR(PORTA, RX_PIN)) & (~PORT_PCR_MUX_MASK))
-			| (2U << PORT_PCR_MUX_SHIFT);
-	PORT_PCR(PORTA, TX_PIN) = ((PORT_PCR(PORTA, TX_PIN)) & (~PORT_PCR_MUX_MASK))
-			| (2U << PORT_PCR_MUX_SHIFT);
+	PORT_PCR(PORTA, RX_PIN) = ((PORT_PCR(PORTA, RX_PIN)) & (~PORT_PCR_MUX_MASK)) | (2U << PORT_PCR_MUX_SHIFT);
+	PORT_PCR(PORTA, TX_PIN) = ((PORT_PCR(PORTA, TX_PIN)) & (~PORT_PCR_MUX_MASK)) | (2U << PORT_PCR_MUX_SHIFT);
 
 	/*setting NVIC*/
 	NVIC_ICPR |= (1U << ID_INT_UART0);
@@ -117,17 +108,13 @@ void uart0_init(unsigned int uart0clk, unsigned int baud_rate) {
 	UART0_C2 &= (~0x0Cu);
 
 	/*config source clock MCGFLLCLK*/
-	SIM_SOPT2 = (SIM_SOPT2 & (~(3u << SIM_SOPT2_UART0SRC_SHIFT)))
-			| (1u << SIM_SOPT2_UART0SRC_SHIFT)
-			| (0u << SIM_SOPT2_PLLFLLSEL_SHIFT);
+	SIM_SOPT2 = (SIM_SOPT2 & (~(3u << SIM_SOPT2_UART0SRC_SHIFT))) | (1u << SIM_SOPT2_UART0SRC_SHIFT) | (0u << SIM_SOPT2_PLLFLLSEL_SHIFT);
 
 	/*config pin Tx Rx*/
-	SIM_SOPT5 &= ~(1u << SIM_SOPT5_UART0RXSRC_SHIFT
-			| 3u << SIM_SOPT5_UART0TXSRC_SHIFT);
+	SIM_SOPT5 &= ~(1u << SIM_SOPT5_UART0RXSRC_SHIFT | 3u << SIM_SOPT5_UART0TXSRC_SHIFT);
 
 	// Setup OSR value
-	UART0_C4 = (UART0_C4 & ~(0x1Fu | 1 << UART0_C4_M10_SHIFT))
-			| (osr_val & 0x1Fu);
+	UART0_C4 = (UART0_C4 & ~(0x1Fu | 1 << UART0_C4_M10_SHIFT)) | (osr_val & 0x1Fu);
 
 	/* Save off the current value of the uartx_BDH except for the SBR field */
 	UART0_BDH = (UART0_BDH & ~(0x1Fu)) | ((sbr_val & 0x1F00u) >> 8);
@@ -189,17 +176,15 @@ char uart_receive_byte() {
 }
 
 void UART0_IRQHandler() {
-	// agregar dato al buffer
 	//uart_send_byte(UART0_D);
+
+	// agregar dato al buffer
 	buffer_add(pBufferRx, UART0_D);
+	// agregar dato al buffer
+	Tm_Inicie_timeout(&c_tiempo, N_TO_PKT_INC, 119); //2 SEG->240 360
 
 	//Tm_Inicie_timeout(&c_tiempo, N_TO_NEW_DATA, 8000); //10 SEG
-	//if (!buffer_is_full(pBufferRx)) {
-	//	flag_xoff = NO;
-	//} else {
-	//	//UART0_D = XOFF; //0x13 XOFF || 0X19 XOFF REALTERM
-	//	flag_xoff = SI;
-	//}
+
 }
 
 /*Printf Function*/

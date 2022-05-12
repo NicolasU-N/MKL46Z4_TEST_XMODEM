@@ -38,16 +38,13 @@
 #include "uart_ringBuffer.h"
 #include "xmodem.h"
 
-//---------------BUFFER-----------------
+//---------------BUFFER RX-----------------
 buffer_struct *pBufferRx;
-char flag_xoff;	//1 xoff activated
-
-char rxvalueMNS;
-char ch;		// buffer character
 //--------------------------------------
 
-//-----------------LCD------------------
+//---------------DISPLAY------------------
 buffer_struct *pBufferDisplay;
+
 //--------------------------------------
 
 //---------------XMODEM-----------------
@@ -58,11 +55,6 @@ buffer_struct *pBufferDisplay;
 Tm_Control c_tiempo;
 static Tm_Periodo periodos[NUM_PER];
 static Tm_Timeout timeouts[NUM_TO];
-static Tm_Pwm pwms[NUM_PWMS];
-
-//char flag_timeout_1 = NO; //
-//char flag_timeout_2 = NO; //
-//char flag_timeout_3 = NO; //
 
 static char atender_timer(char atienda);
 //-------------------------------------
@@ -78,8 +70,7 @@ int main(void) {
 
 	pit_init_ch0(0x30D37); //0x30D37 -> 8.333ms || 0x124F7 -> 3.125ms || 0x752F-> 1.25ms || 0xB71AFF -> 500ms
 
-	Tm_Inicio(&c_tiempo, periodos, NUM_PER, timeouts, NUM_TO, pwms, NUM_PWMS,
-			&atender_timer); //, pwms, NUM_PWMS
+	Tm_Inicio(&c_tiempo, periodos, NUM_PER, timeouts, NUM_TO, &atender_timer); //, pwms, NUM_PWMS
 
 	xmodem_init();
 
@@ -87,9 +78,6 @@ int main(void) {
 
 	//myprintf("Hello World\r\n");
 	uart_send_byte(NAK); //NACK 21
-
-	//BOARD_InitDebugConsole();
-	//PRINTF("Hello World\r\n");
 
 	while (1) {
 
@@ -105,13 +93,17 @@ int main(void) {
 		//PROCESE XMODEM
 		procesar_xmoden();
 
-		//Timeouts
-		/*
-		 if (Tm_Hubo_timeout(&c_tiempo, N_TO_2HZ)) {
-		 Tm_Termine_timeout(&c_tiempo, N_TO_2HZ);
-		 set_blink_2hz();
-		 }
-		 */
+		//BLINKS
+		if (Tm_Hubo_periodo(&c_tiempo, N_PER_1HZ)) { // blink 1HZ
+			Tm_Baje_periodo(&c_tiempo, N_PER_1HZ);
+			toggle_state_display();
+		}
+
+		if (Tm_Hubo_periodo(&c_tiempo, N_PER_2HZ)) { // blink 2HZ
+			Tm_Baje_periodo(&c_tiempo, N_PER_2HZ);
+			toggle_state_display();
+		}
+
 	}
 	return 0;
 }

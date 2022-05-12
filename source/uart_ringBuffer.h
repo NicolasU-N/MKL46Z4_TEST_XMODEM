@@ -43,4 +43,6 @@ void myprintf(char*, ...);
 
 void myprintf_uart1(char*, ...);
 
+void UART1_Write(uint8_t data);
+
 #endif /* UART_RING_BUFFER_H_ */

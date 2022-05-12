@@ -4,7 +4,7 @@
 
 #include "Varios.h"
 #include "uart_ringBuffer.h"
-#include "board.h"
+//#include "board.h"
 
 /* Tipo de dato para los contadores */
 typedef unsigned int Tm_Contador;
@@ -51,18 +51,17 @@ struct Tm_Control {
 	/* Tabla de timeouts/retardos */
 	Tm_Timeout *tp;
 	Tm_Num nto;
-
-	/* Tabla de senales PWM */
-	Tm_Pwm *ppwm;
-	Tm_Num npwm;
-
+	/*
+	 // Tabla de senales PWM
+	 Tm_Pwm *ppwm;
+	 Tm_Num npwm;
+	 */
 	/* Rutina para manejar el timer (HW) */
 	Tm_Atender *atender;
 };
 
 /* Rutina para iniciar el módulo (su estructura de datos) */
-void Tm_Inicio(Tm_Control *tcp, Tm_Periodo *pp, Tm_Num nper, Tm_Timeout *tp,
-		Tm_Num nto, Tm_Pwm *ppwm, Tm_Num npwm, Tm_Atender *atender); //Tm_Pwm *ppwm, Tm_Num npwm,
+void Tm_Inicio(Tm_Control *tcp, Tm_Periodo *pp, Tm_Num nper, Tm_Timeout *tp, Tm_Num nto, Tm_Atender *atender); //Tm_Pwm *ppwm, Tm_Num npwm,
 
 /* Rutina para procesar el módulo (dentro del loop de polling) */
 void Tm_Procese(Tm_Control *tcp);
@@ -85,22 +84,23 @@ void Tm_Baje_periodo(Tm_Control *tcp, Tm_Num num_periodo);
 char Tm_Inicie_timeout(Tm_Control *tcp, Tm_Num num_timeout, Tm_Contador espera);
 
 /* Desactivar un timeout/retardo para que deje de funcionar */
-void Tm_Termine_timeout(Tm_Control *tcp, Tm_Num num_timeout);
+char Tm_Termine_timeout(Tm_Control *tcp, Tm_Num num_timeout);
 
 /* Verificar si hubo timeout (o se completo el retardo) */
 char Tm_Hubo_timeout(Tm_Control *tcp, Tm_Num num_timeout);
 
 //----------------------------------------------
+/*
+ //Configurar un pwm para que empiece a funcionar
+ char Tm_Inicie_pwm(Tm_Control *tcp, Tm_Num num_pwm, Tm_Contador periodo,
+ Tm_Contador cmp, Tm_Num num_puerto); //, GPIO_Type *puerto
 
-//Configurar un pwm para que empiece a funcionar
-char Tm_Inicie_pwm(Tm_Control *tcp, Tm_Num num_pwm, Tm_Contador periodo,
-		Tm_Contador cmp, Tm_Num num_puerto); //, GPIO_Type *puerto
+ // Desactivar un período para que deje de funcionar
+ char Tm_Termine_pwm(Tm_Control *tcp, Tm_Num num_pwm);
 
-// Desactivar un período para que deje de funcionar
-char Tm_Termine_pwm(Tm_Control *tcp, Tm_Num num_pwm);
-
-// Verificar si hubo fin de conteo en un periodo
-//char Tm_Hubo_pwm(Tm_Control *tcp, Tm_Num num_pwm);
+ // Verificar si hubo fin de conteo en un periodo
+ //char Tm_Hubo_pwm(Tm_Control *tcp, Tm_Num num_pwm);
+ */
 
 /* == FIN DE RUTINAS DE INTERFAZ == */
 
