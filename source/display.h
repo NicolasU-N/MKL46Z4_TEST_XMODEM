@@ -33,6 +33,6 @@ void display_scan(uint8_t character);
 
 void set_display_stby();
 
-void display_off();
+void set_display_off();
 
 #endif /* DISPLAY_H_ */

@@ -7,26 +7,21 @@
 #include "xmodem.h"
 
 extern Tm_Control c_tiempo;
-
 extern buffer_struct *pBufferRx;
 extern buffer_struct *pBufferDisplay;
-
-extern char state_display;
-//extern uint8_t txbuff[];
 
 //----------------- VALIDAR ERRORES ----------------------
 char flag_eot = SI;
 char flagvalidate = SI;
 
 uint8_t chrx;
-uint8_t lastpakectNo = 0;		// idx del ultimo paquete recibido
+uint8_t lastpakectNo = 0;		// idx del ultimo paquete
 
 uint8_t pakectNo = 0;			// idx del paquete
 uint8_t lastpakectNoComp = 0;	// idx del paquete complemento a 1
 
 char num_intentos_ACK = 0;
-unsigned char countBytes = 0;	// contador bytes recorridos del buffer
-unsigned char sum_checksum;		// sumatoria modulo del paqueete
+uint8_t sum_checksum;			// sumatoria modulo del paqueete
 //--------------------------------------------------------
 
 char state_xmodem = RECIBIR;
@@ -43,77 +38,74 @@ void procesar_xmoden() {
 		if (buffer_is_empty(pBufferRx)) {
 			if (Tm_Hubo_periodo(&c_tiempo, N_PER_SEND_ACK)) { // 1seg envia NAK o ACK
 				Tm_Baje_periodo(&c_tiempo, N_PER_SEND_ACK);
-				if (flag_eot) { //Se termino la transmision
+				if (flag_eot) {	//Se termino la transmision
 					uart_send_byte(NAK);
-
-				} else { // No ha finalizado la transmision
+				} else {		// No ha finalizado la transmision
 
 					switch (num_intentos_ACK) {
-					case 2:
-						state_display=END_DISPLAY;
+					case 1:
 						set_blink_1hz();
-						myprintf_uart1("BLINK1-%d\r\n", num_intentos_ACK);
-						//Tm_Inicie_timeout(&c_tiempo, N_TO_2HZ, 2400); //20 SEG //iniciar to
 						break;
 					case 20:
-						state_display=END_DISPLAY;
 						set_blink_2hz();
-						myprintf_uart1("BLINK2-%d\r\n", num_intentos_ACK);
 						break;
 					}
 
 					if (!flagvalidate) {
+						myprintf_uart1("NAK %d\r\n", num_intentos_ACK);
+						buffer_reset(pBufferRx);		//reset buffer
 						uart_send_byte(NAK);
 					} else {
-						myprintf_uart1("ACK %d\r\n", num_intentos_ACK);
-						//set_normal_mode();
-						uart_send_byte(ACK);
+
+						//buffer_reset(pBufferRx);		//reset buffer
+						if (Tm_Hubo_timeout(&c_tiempo, N_TO_PKT_INC)) {
+							//Tm_Termine_timeout(&c_tiempo, N_TO_PKT_INC);
+							buffer_reset(pBufferRx);		//reset buffer
+							uart_send_byte(NAK);
+							myprintf_uart1("NAK TO %d\r\n", num_intentos_ACK);
+						} else {
+							buffer_reset(pBufferRx);		//reset buffer
+							uart_send_byte(ACK);
+							myprintf_uart1("ACK %d\r\n", num_intentos_ACK);
+						}
 
 					}
 
-					if (num_intentos_ACK < 22)
+					if (num_intentos_ACK < 20)
 						num_intentos_ACK++;
 
 				}
 			}
 		}
 
-		//if (buffer_get_count(pBufferRx) >= 150) { //empezar a validar
 		if (buffer_is_full(pBufferRx)) {
-			/* DEBUG BUFFER
-			 uart_send_byte(CAN);
-			 uart_send_byte(CAN);
+			//DEBUG BUFFER
+			/*
 			 uart_send_byte(CAN);
 			 uart_send_byte(CAN);
 
-			 myprintf("\r\n");
+			 myprintf_uart1("\r\n");
 
 			 while (buffer_get_data(pBufferRx, &chrx)) //&& pBufferRx->count >= 1
 			 {
 			 //uart_send_byte(&chtx, 1);
 			 //PRINTF("%d\r\n", chtx);
-			 myprintf(" %d\r\n", chrx);
+			 myprintf_uart1(" %d\r\n", chrx);
 			 }
 			 */
-			//txbuff = "BUFF FULL\r\n";
-			//UART_WriteBlocking(DEMO_UART, txbuff, sizeof(txbuff) - 1);
-			//uint8_t *txbf = (uint8_t*) "BF FULL\r\n";
-			//UART_WriteBlocking(DEMO_UART, txbf, strlen((char*) txbf));
-			//-------
-			/*
-			 myprintf_uart1("BF FULL %d\r\n", pakectNo);
-			 */
-//------------------- degub display
-			state_display = NORMAL_MODE;
+			//------------------- degub display
+			set_normal_mode();
 			//myprintf("BF FULL\r\n");
 
 			state_xmodem = VALIDAR;
 			flagvalidate = SI;
-			//reset contador intentos NAK
-			sum_checksum = num_intentos_ACK = 0;//pakectNo = lastpakectNo = lastpakectNoComp
 			flag_eot = NO; //bandera para validar que se termino la transmision
+			//reset contador intentos NAK
+			sum_checksum = num_intentos_ACK = 0;			//pakectNo = lastpakectNo = lastpakectNoComp
+
 		} else {
-			//Si no esta lleno valide que el primer caracter sea un EOT sino es un paquete incompleto
+			//Si no esta lleno, valide que el primer caracter sea un EOT sino es un paquete incompleto
+
 			if (buffer_is_empty(pBufferDisplay)) {
 				buffer_peek(pBufferRx, &chrx, 0);
 				//PRINTF("\r\nVALIDAR %d\r\n", chrx);
@@ -127,17 +119,39 @@ void procesar_xmoden() {
 					//uart_send_byte(ACK);
 					buffer_reset(pBufferRx);			//reset buffer
 					chrx = 0;
-					state_xmodem = RECIBIR;
 
-					state_display = STBY;
+					state_xmodem = RECIBIR;
+					set_stby_mode();
 
 					flag_eot = SI;
 					flagvalidate = SI;
-					sum_checksum = pakectNo = lastpakectNoComp = lastpakectNo =
-							num_intentos_ACK = 0;
-					//break;
+					sum_checksum = pakectNo = lastpakectNoComp = lastpakectNo = num_intentos_ACK = 0;
+				} else if (chrx == 1) { //&& buffer_get_count(pBufferRx)
+
+					if (Tm_Hubo_timeout(&c_tiempo, N_TO_PKT_INC)) {
+						//Tm_Termine_timeout(&c_tiempo, N_TO_PKT_INC);
+						myprintf_uart1("BF INCL\r\n");
+						buffer_reset(pBufferRx);			//reset buffer
+						sum_checksum = num_intentos_ACK = 0;
+						flag_eot = NO;
+						flagvalidate = NO;
+						state_xmodem = RECIBIR;
+						chrx = 0;
+					}
+
 				}
 
+			}
+
+			if (Tm_Hubo_timeout(&c_tiempo, N_TO_PKT_INC) && !flag_eot) {
+				Tm_Termine_timeout(&c_tiempo, N_TO_PKT_INC);
+				myprintf_uart1("BF INCL\r\n");
+				buffer_reset(pBufferRx);			//reset buffer
+				sum_checksum = num_intentos_ACK = 0;
+				flag_eot = NO;
+				flagvalidate = NO;
+				state_xmodem = RECIBIR;
+				chrx = 0;
 			}
 
 		}
@@ -176,27 +190,28 @@ void procesar_xmoden() {
 		 myprintf_uart1("VAL LPKTN %d\r\n", lastpakectNoComp);
 		 */
 
-		if ((pakectNo == lastpakectNo + 1)
-				&& (lastpakectNoComp == 255 - pakectNo)) { // en secuencia Y valida complemento
-
+		if ((pakectNo == lastpakectNo + 1) && (lastpakectNoComp == 255 - pakectNo)) { // en secuencia Y valida complemento
+			myprintf_uart1("\r\nOK PCKT\r\n");
 			lastpakectNo = pakectNo; // Actualizar pakectNo
 			flag_eot = NO;
 			flagvalidate = SI;
+
 			//myprintf("\r\nPAQUETE OK %d\r\n", chrx);
 			//PRINTF("\r\nPAQUETE OK %d\r\n", chrx);
 
 		} else if (pakectNo == lastpakectNo) { //Validar duplicado
+			myprintf_uart1("\r\nDUP PCK=%d COMP=%d\r\n", pakectNo, lastpakectNoComp);
 			lastpakectNo = pakectNo; // Actualizar pakectNo
 			flag_eot = NO;
 			flagvalidate = SI; //ENVIAR ACK
 			buffer_reset(pBufferRx);			//reset buffer
 			//CAMBIAR ESTADO
 			state_xmodem = RECIBIR;
-			break;
+			//break;
 
 			//myprintf("\r\nPAQUETE REPETIDO %d\r\n", chrx);
 		} else { //fuera de secuencia
-
+			myprintf_uart1("\r\nFS PCK=%d COMP=%d\r\n", pakectNo, lastpakectNoComp);
 			//myprintf("\r\nERROR PCK=%d COMP=%d\r\n", pakectNo,
 			//		lastpakectNoComp);
 			flag_eot = NO;
@@ -207,7 +222,7 @@ void procesar_xmoden() {
 			buffer_reset(pBufferRx);			//reset buffer
 			//uart_send_byte(NAK); // Enviar NAK y resetear banderas
 			state_xmodem = RECIBIR;
-			break;
+			//break;
 		}
 		//---------------------------------------
 		//--------------------------------------- VALIDAR CHECKSUM
@@ -239,11 +254,11 @@ void procesar_xmoden() {
 			buffer_get_data(pBufferRx, &chrx);
 			buffer_get_data(pBufferRx, &chrx); // Omitir header del paquete
 		} else {
-			//myprintf("\r\nERR CSP=%d CSC=%d\r\n", chrx, sum_checksum % 256);
+			myprintf_uart1("\r\nERR CSP=%d CSC=%d\r\n", chrx, sum_checksum % 256);
 			flag_eot = NO;
 			flagvalidate = NO;
 			buffer_reset(pBufferRx);		//reset buffer
-			sum_checksum = pakectNo = chrx = 0;
+			sum_checksum = chrx = 0; //pakectNo
 			// Enviar NAK, resetear banderas y cambiar a estado recibir
 			state_xmodem = RECIBIR;
 			//break;
@@ -255,8 +270,7 @@ void procesar_xmoden() {
 
 		if (buffer_available(pBufferDisplay)) { // hay espacio disponible en el buffer del display
 			// copiar al buffer del display
-			if (buffer_get_data(pBufferRx, &chrx)
-					&& buffer_get_count(pBufferRx) >= 1) {
+			if (buffer_get_data(pBufferRx, &chrx) && buffer_get_count(pBufferRx) >= 1) {
 				//myprintf_uart1("CRX=%d-", chrx);
 				buffer_add(pBufferDisplay, chrx);
 			} else {
