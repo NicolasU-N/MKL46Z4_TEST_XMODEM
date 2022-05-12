@@ -14,7 +14,7 @@
 #include "MKL46Z4.h"
 
 typedef struct {
-	int32_t count, size, indexRead,indexWrite;
+	int32_t count, size, indexRead, indexWrite;
 	uint8_t *pBuf;
 } buffer_struct;
 
@@ -59,12 +59,6 @@ char buffer_get_data(buffer_struct *pRb, uint8_t *dp);
 char buffer_peek(buffer_struct *pRb, uint8_t *dp, int32_t index);
 
 int32_t buffer_get_count(buffer_struct *pRb);
-
-/*
- bool ringBuffer_isFull(buffer_struct *pRb);
-
- bool ringBuffer_isEmpty(buffer_struct *pRb);
- */
 
 void buffer_reset(buffer_struct *pRb);
 

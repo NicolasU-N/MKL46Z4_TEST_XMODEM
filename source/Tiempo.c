@@ -13,16 +13,7 @@ void Tm_Inicio(Tm_Control *tcp, Tm_Periodo *pp, Tm_Num nper, Tm_Timeout *tp, Tm_
 		pp->banderas = 0;
 		pp->contador = pp->periodo = 0;
 	}
-	/*
-	 //Tabla de pwms
-	 tcp->ppwm = ppwm;
-	 tcp->npwm = npwm;
-	 for (i = npwm; i; ++ppwm, --i) {
-	 ppwm->num_puerto = 0;
-	 //ppwm->puerto = 0;
-	 ppwm->contador = ppwm->cmp = ppwm->periodo = 0;
-	 }
-	 */
+
 	/* Tabla de timeouts/retardos */
 	tcp->tp = tp;
 	tcp->nto = nto;
@@ -54,19 +45,6 @@ void Tm_Procese(Tm_Control *tcp) {
 				pp->contador = pp->periodo;
 			}
 		}
-	/*
-	 //Procesa la tabla de pwms
-	 for (i = tcp->npwm, ppwm = tcp->ppwm; i; ++ppwm, --i) {
-	 --(ppwm->contador);
-	 if (!(ppwm->contador)) { //	Fin de conteo: activa la bandera y reinicia el contador
-	 //Encender Led
-	 PTD->PCOR |= (1u << ppwm->num_puerto); // ON
-	 ppwm->contador = ppwm->periodo;
-	 } else if (ppwm->contador == ppwm->cmp) {
-	 PTD->PSOR |= (1u << ppwm->num_puerto); // OFF
-	 }
-	 }
-	 */
 
 	/* Procesa la tabla de timeouts/retardos */
 	for (i = tcp->nto, tp = tcp->tp; i; ++tp, --i)
@@ -150,37 +128,3 @@ char Tm_Hubo_timeout(Tm_Control *tcp, Tm_Num num_timeout) {
 }
 
 //----------------------------------------------
-/*
- // Configurar un pwm para que empiece a funcionar
- char Tm_Inicie_pwm(Tm_Control *tcp, Tm_Num num_pwm, Tm_Contador periodo,
- Tm_Contador cmp, Tm_Num num_puerto) { //, GPIO_Type *puerto
-
- Tm_Pwm *ppwm;
-
- if (num_pwm >= tcp->npwm)
- return NO;
-
- ppwm = tcp->ppwm + num_pwm;
- ppwm->num_puerto = num_puerto;
-
- ppwm->cmp = cmp;
- ppwm->contador = ppwm->periodo = periodo;
-
- return SI;
- }
-
- ///Desactivar un período para que deje de funcionar
- char Tm_Termine_pwm(Tm_Control *tcp, Tm_Num num_pwm) {
- Tm_Pwm *ppwm;
-
- if (num_pwm >= tcp->npwm)
- return NO;
-
- ppwm = tcp->ppwm + num_pwm;
- ppwm->contador = ppwm->cmp = ppwm->periodo = 0; //Esto no es necesario, pero es prudente.
- }
- */
-
-/* Verificar si hubo fin de conteo en un periodo */
-//char Tm_Hubo_pwm(Tm_Control *tcp, Tm_Num num_pwm) {
-//}

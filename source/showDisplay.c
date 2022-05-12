@@ -44,21 +44,12 @@ void show_data() {
 void set_blink_1hz() {
 	Tm_Termine_periodo(&c_tiempo, N_PER_2HZ);
 	Tm_Inicie_periodo(&c_tiempo, N_PER_1HZ, 60); // 500msec 1HZ 50%
-	//show_data();
-	//state_display = END_DISPLAY;
-	//Tm_Inicie_pwm(&c_tiempo, N_PWM_S1, 120, 60, COM_1_PIN); //1 Hz 1000ms
-	//Tm_Inicie_pwm(&c_tiempo, N_PWM_S2, 120, 60, COM_2_PIN); //1 Hz 1000ms
-	//Tm_Inicie_pwm(&c_tiempo, N_PWM_S3, 120, 60, COM_3_PIN); //1 Hz 1000ms
+
 }
 
 void set_blink_2hz() {
 	Tm_Termine_periodo(&c_tiempo, N_PER_1HZ);
 	Tm_Inicie_periodo(&c_tiempo, N_PER_2HZ, 30); // 250msec 2HZ 50%
-	//show_data();
-	//state_display = END_DISPLAY;
-	//Tm_Inicie_pwm(&c_tiempo, N_PWM_S1, 60, 30, COM_1_PIN); //1 Hz 1000ms
-	//Tm_Inicie_pwm(&c_tiempo, N_PWM_S2, 60, 30, COM_2_PIN); //1 Hz 1000ms
-	//Tm_Inicie_pwm(&c_tiempo, N_PWM_S3, 60, 30, COM_3_PIN); //1 Hz 1000ms
 }
 
 void set_normal_mode() {
@@ -66,10 +57,6 @@ void set_normal_mode() {
 	//Terminar periodos
 	Tm_Termine_periodo(&c_tiempo, N_PER_1HZ);
 	Tm_Termine_periodo(&c_tiempo, N_PER_2HZ);
-	//show_data();
-	//Tm_Inicie_pwm(&c_tiempo, N_PWM_S1, 120, 119, COM_1_PIN); //1 Hz 1000ms
-	//Tm_Inicie_pwm(&c_tiempo, N_PWM_S2, 120, 119, COM_2_PIN); //1 Hz 1000ms
-	//Tm_Inicie_pwm(&c_tiempo, N_PWM_S3, 120, 119, COM_3_PIN); //1 Hz 1000ms
 }
 
 void set_stby_mode() {

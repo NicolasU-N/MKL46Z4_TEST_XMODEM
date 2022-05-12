@@ -25,30 +25,6 @@ buffer_struct* buffer_init(int32_t size) {
 }
 
 char buffer_add(buffer_struct *pRb, uint8_t data) {
-	/*
-	 //buffer_struct *rb = pRb;
-	 char ret = true;
-
-	 pRb->pBuf[pRb->indexWrite] = data;
-
-	 pRb->indexWrite++;
-	 if (pRb->indexWrite >= pRb->size)
-	 pRb->indexWrite = 0;
-
-	 if (pRb->count < pRb->size) {
-	 pRb->count++;
-	 } else {
-	 //si el buffer está lleno incrementa en uno indexRead
-	 //haciendo que se pierda el dato más viejo y devuelve
-	 //true para indicar que se estan perdiendo datos
-	 pRb->indexRead++;
-	 if (pRb->indexRead >= pRb->size)
-	 pRb->indexRead = 0;
-	 ret = false;
-	 }
-
-	 return ret;
-	 */
 	if (pRb->count < pRb->size) {
 		pRb->pBuf[pRb->indexWrite] = data;
 		(pRb->indexWrite)++;
@@ -64,23 +40,6 @@ char buffer_add(buffer_struct *pRb, uint8_t data) {
 }
 
 char buffer_get_data(buffer_struct *pRb, uint8_t *dp) {
-	/*
-	 char ret = true;
-
-	 if (pRb->count) {
-	 *data = pRb->pBuf[pRb->indexRead];
-
-	 pRb->indexRead++;
-	 if (pRb->indexRead >= pRb->size)
-	 pRb->indexRead = 0;
-	 pRb->count--;
-	 } else {
-	 ret = false;
-	 }
-
-	 return ret;
-	 */
-
 	if (pRb->count) {
 		*dp = pRb->pBuf[pRb->indexRead];
 		__disable_irq();
@@ -108,20 +67,6 @@ char buffer_peek(buffer_struct *pRb, uint8_t *dp, int32_t index) {
 int32_t buffer_get_count(buffer_struct *pRb) {
 	return pRb->count;
 }
-
-/*
- char ringBuffer_isFull(buffer_struct *pRb) {
- //buffer_struct *rb = pRb;
-
- return pRb->count == pRb->size; //rb->size ((rb->size) * 0.75) 48
- }
-
- char ringBuffer_isEmpty(buffer_struct *pRb) {
- //buffer_struct *rb = pRb;
-
- return pRb->count == 0; //0 ((rb->size) * 0.25)
- }
- */
 
 void buffer_reset(buffer_struct *pRb) {
 	pRb->count = pRb->indexRead = pRb->indexWrite = 0;

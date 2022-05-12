@@ -44,7 +44,6 @@ buffer_struct *pBufferRx;
 
 //---------------DISPLAY------------------
 buffer_struct *pBufferDisplay;
-
 //--------------------------------------
 
 //---------------XMODEM-----------------
@@ -90,7 +89,7 @@ int main(void) {
 			show_data();
 		}
 
-		//PROCESE XMODEM
+		//XMODEM
 		procesar_xmoden();
 
 		//BLINKS
