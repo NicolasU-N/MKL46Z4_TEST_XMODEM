@@ -17,8 +17,8 @@ void pit_init_ch0(uint32_t ldval) {
 	//Initialize PIT0 to count down from starting_value
 	PIT->CHANNEL[0].LDVAL = ldval; // every 500ms   V = 0.00625 * 24000000–1    T(seconds) || 0.003125 * 24000000–1 || 0.00125 * 24000000–1 || 0.008333 * 24000000–1
 	PIT->CHANNEL[0].TCTRL &= PIT_TCTRL_CHN_MASK;	//No chaining of timers
-	PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TEN_MASK;
 	PIT->CHANNEL[0].TCTRL |= PIT_TFLG_TIF_MASK;
+	PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TEN_MASK;	//enable timer
 }
 
 void pit_init_ch1(uint32_t ldval) {
@@ -31,7 +31,7 @@ void pit_init_ch1(uint32_t ldval) {
 	//Initialize PIT0 to count down from starting_value
 	PIT->CHANNEL[1].LDVAL = ldval; // 0x4FFFFF every 500ms   V = 0.5 * 10485760–1    T(seconds) 10485760(Bus Clock)
 	PIT->CHANNEL[1].TCTRL &= PIT_TCTRL_CHN_MASK;	//No chaining of timers
-	PIT->CHANNEL[1].TCTRL |= PIT_TCTRL_TEN_MASK;
+	PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TIE_MASK; //enable int
 	PIT->CHANNEL[1].TCTRL |= PIT_TFLG_TIF_MASK;
 }
 

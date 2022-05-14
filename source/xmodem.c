@@ -56,8 +56,12 @@ void procesar_xmoden() {
 						buffer_reset(pBufferRx);		//reset buffer
 						uart_send_byte(NAK);
 					} else {
+						/*
+						 buffer_reset(pBufferRx);		//reset buffer
+						 uart_send_byte(ACK);
+						 myprintf_uart1("ACK %d\r\n", num_intentos_ACK);
+						 */
 
-						//buffer_reset(pBufferRx);		//reset buffer
 						if (Tm_Hubo_timeout(&c_tiempo, N_TO_PKT_INC)) {
 							//Tm_Termine_timeout(&c_tiempo, N_TO_PKT_INC);
 							buffer_reset(pBufferRx);		//reset buffer
@@ -122,17 +126,17 @@ void procesar_xmoden() {
 					sum_checksum = pakectNo = lastpakectNoComp = lastpakectNo = num_intentos_ACK = 0;
 					uart_send_byte(ACK);
 				}
-			}
 
-			if (Tm_Hubo_timeout(&c_tiempo, N_TO_PKT_INC) && !flag_eot) {
-				Tm_Termine_timeout(&c_tiempo, N_TO_PKT_INC);
-				myprintf_uart1("BF INCL\r\n");
-				buffer_reset(pBufferRx);			//reset buffer
-				sum_checksum = num_intentos_ACK = 0;
-				flag_eot = NO;
-				flagvalidate = NO;
-				state_xmodem = RECIBIR;
-				chrx = 0;
+				if (Tm_Hubo_timeout(&c_tiempo, N_TO_PKT_INC) && !flag_eot) {
+					Tm_Termine_timeout(&c_tiempo, N_TO_PKT_INC);
+					myprintf_uart1("BF INCL\r\n");
+					buffer_reset(pBufferRx);			//reset buffer
+					sum_checksum = num_intentos_ACK = 0;
+					flag_eot = NO;
+					flagvalidate = NO;
+					state_xmodem = RECIBIR;
+					chrx = 0;
+				}
 			}
 
 		}
