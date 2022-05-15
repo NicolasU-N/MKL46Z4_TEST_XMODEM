@@ -60,9 +60,9 @@ void uart0_init(unsigned int uart0clk, unsigned int baud_rate) {
 	PORT_PCR(PORTA, TX_PIN) = ((PORT_PCR(PORTA, TX_PIN)) & (~PORT_PCR_MUX_MASK)) | (2U << PORT_PCR_MUX_SHIFT);
 
 	/*setting NVIC*/
-	NVIC_ICPR |= (1U << ID_INT_UART0);
-	NVIC_IPR(3) |= (1U << NVIC_IPR_PRI_N0_SHIFT);
-	NVIC_ISER |= (1U << ID_INT_UART0);
+	//NVIC_ICPR |= (1U << ID_INT_UART0);
+	//NVIC_IPR(3) |= (1U << NVIC_IPR_PRI_N0_SHIFT);
+	//NVIC_ISER |= (1U << ID_INT_UART0);
 
 	/*******************************************************************/
 	/*This field configures the oversampling ratio for the receiver between 4x (00011) and 32x (11111).*/
@@ -127,9 +127,9 @@ void uart0_init(unsigned int uart0clk, unsigned int baud_rate) {
 	UART0_S1 |= (1 << 2u);
 
 	/* Enable receiver interrupt receive*/
-	UART0_C2 = 0x0Cu | 1 << UART0_C2_RIE_SHIFT;
-	//------------------------------------------------------ Wo interrupt
-	//UART0_C2 = 0x0Cu;
+	//UART0_C2 = 0x0Cu | 1 << UART0_C2_RIE_SHIFT;
+	//------------------------------------------------------ NO interrupt
+	UART0_C2 = 0x0Cu;
 }
 
 void uart_send_byte(uint8_t data_input) {
@@ -150,42 +150,23 @@ char uart_receive_byte() {
 	//while (!(UART0_S1 & (1 << UART0_S1_RDRF_SHIFT)))
 	//;
 
-	//return UART0_D;
-
 	if ((UART0_S1 & (1 << UART0_S1_RDRF_SHIFT))) {
 		buffer_add(pBufferRx, UART0_D);
-		//Tm_Inicie_timeout(&c_tiempo, N_TO_NEW_DATA, 400); // 1600 -> 2 seg||8000 -> 10 SEG
-		/*
-		 if (!buffer_is_full(pBufferRx)) {
-		 //flag_xoff = NO;
-		 } else {
-		 UART0_D = XOFF; //0x13 XOFF || 0X19 XOFF REALTERM
-		 //flag_xoff = SI;
-		 }
-		 */
-		//uart_send_byte(UART0_D);
-		//if (buffer_add(pBufferRx, UART0_D)) {
-		//uart_send_byte(UART0_D);
-		//	return SI;
-		//} else {
-		//	return NO;
-		//}
+		Tm_Inicie_timeout(&c_tiempo, N_TO_PKT_INC, 1200); // 10seg	|| 2 SEG->240 360
+		Tm_Inicie_timeout(&c_tiempo, N_TO_ERROR_SH, 240); // 1seg	|| 2 SEG->240 360
+		return SI;
+	} else {
+		return NO;
 	}
-	return UART0_D;
-	//buffer_add(pBufferRx, UART0_D);
+	//return UART0_D;
 }
 
-void UART0_IRQHandler() {
-	//uart_send_byte(UART0_D);
-
-	// agregar dato al buffer
-	buffer_add(pBufferRx, UART0_D);
-	// agregar dato al buffer
-	Tm_Inicie_timeout(&c_tiempo, N_TO_PKT_INC, 119); //2 SEG->240 360
-
-	//Tm_Inicie_timeout(&c_tiempo, N_TO_NEW_DATA, 8000); //10 SEG
-
-}
+/*
+ void UART0_IRQHandler() {
+ //uart_send_byte(UART0_D);
+ buffer_add(pBufferRx, UART0_D); // agregar dato al buffer
+ }
+ */
 
 /*Printf Function*/
 void myprintf(char *str, ...) {

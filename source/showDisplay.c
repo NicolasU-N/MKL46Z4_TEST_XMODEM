@@ -10,15 +10,12 @@ extern Tm_Control c_tiempo;
 extern buffer_struct *pBufferDisplay;
 
 char state_display;
-//char last_state_display;
-
 uint8_t character;
 
 void show_data_init() {
 	// Initialize display
 	display_init();
 	state_display = STBY_MODE;
-	//last_state_display = STBY_MODE;
 	Tm_Inicie_periodo(&c_tiempo, N_PER_MUX, 1); //8.333 ms = 120hz
 	pBufferDisplay = buffer_init(BUFF_SIZE_DIS); // 32 64 200
 }
