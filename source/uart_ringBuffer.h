@@ -37,7 +37,7 @@ void uart_send_string(uint8_t *str_data);
 
 char uart_receive_byte();
 
-void UART0_IRQHandler();
+//void UART0_IRQHandler();
 
 void myprintf(char*, ...);
 
